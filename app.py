@@ -1,57 +1,69 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from datetime import datetime
 import json
 import os
-from datetime import datetime
 
 app = Flask(__name__)
+
+# Шлях до файлу для збереження повідомлень
 DATA_FILE = os.path.join("storage", "data.json")
 
-# Функція для завантаження даних з файлу
-def load_data():
-    if not os.path.exists(DATA_FILE):
-        return {}
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as file:
-            return json.load(file)
-    except json.JSONDecodeError:
-        return {}
+# Створіть storage/data.json, якщо його немає
+if not os.path.exists("storage"):
+    os.makedirs("storage")
 
-# Функція для збереження даних у файл
-def save_data(username, message):
-    data = load_data()  # Завантажуємо наявні дані
-    timestamp = str(datetime.now())  # Генеруємо унікальний ключ на основі поточного часу
-    data[timestamp] = {"username": username, "message": message}
-    
-    # Записуємо дані у файл
-    with open(DATA_FILE, "w", encoding="utf-8") as file:
-        json.dump(data, file, indent=4, ensure_ascii=False)
+if not os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "w") as file:
+        json.dump({}, file)
+
 
 # Головна сторінка
 @app.route("/")
 def index():
     return render_template("index.html")
 
-# Сторінка з формою
+
+# Сторінка для надсилання повідомлення
 @app.route("/message", methods=["GET", "POST"])
 def message():
     if request.method == "POST":
-        # Отримання даних з форми
-        username = request.form.get("username", "Anonymous")
-        user_message = request.form.get("message", "")
-        
-        # Збереження даних у файл
-        if user_message:
-            save_data(username, user_message)
-        return redirect(url_for("index"))
+        username = request.form.get("username")
+        message = request.form.get("message")
+
+        if username and message:
+            # Збереження у файл
+            with open(DATA_FILE, "r") as file:
+                data = json.load(file)
+
+            data[str(datetime.now())] = {"username": username, "message": message}
+
+            with open(DATA_FILE, "w") as file:
+                json.dump(data, file, indent=4)
+
+            return redirect(url_for("index"))
+
     return render_template("message.html")
+
+
+# Сторінка для читання збережених повідомлень
+@app.route("/read")
+def read():
+    with open(DATA_FILE, "r") as file:
+        messages = json.load(file)
+    return render_template("read.html", messages=messages)
+
+
+# Маршрут для статичних ресурсів (CSS, лого)
+@app.route("/<path:filename>")
+def static_files(filename):
+    return send_from_directory("static", filename)
+
 
 # Обробка помилки 404
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("error.html"), 404
 
+
 if __name__ == "__main__":
-    # Переконайтеся, що папка storage існує
-    if not os.path.exists("storage"):
-        os.makedirs("storage")
-    app.run(debug=True, port=3000)
+    app.run(port=3000, debug=True)

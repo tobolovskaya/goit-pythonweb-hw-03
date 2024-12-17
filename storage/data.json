@@ -1,11 +1,12 @@
 {
-    "2024-12-16 15:22:45.123456": {
-      "username": "example",
-      "message": "example message"
-    },
-    "2024-12-16 15:23:10.654321": {
-      "username": "test_user",
-      "message": "Hello World!"
-    }
+  "2022-10-29 20:20:58.020261": {
+    "username": "krabaton",
+    "message": "First message"
+  },
+  "2022-10-29 20:21:11.812177": {
+    "username": "Krabat",
+    "message": "Second message"
   }
+}
+
   
