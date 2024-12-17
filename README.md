@@ -11,7 +11,7 @@ This project is a simple web application built with Flask. It includes:
 ## Installation and Setup
 1. Clone the Repository
 
-git clone https://github.com/your-username/goit-pythonweb-hw-03.git
+git clone https://github.com/tobolovskaya/goit-pythonweb-hw-03.git
 cd goit-pythonweb-hw-03
 
 2. Create a Virtual Environment (Optional)
